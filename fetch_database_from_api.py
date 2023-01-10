@@ -1,6 +1,8 @@
 # Importing necessary libraries and modules
 from flask import Flask, request, jsonify
 import mysql.connector as conn
+import pymongo
+
 
 # Creating the app object for the class Flask
 app = Flask(__name__)
@@ -46,8 +48,29 @@ def get_from_sql():
 
 @app.route('/mongodb', methods = ['GET', 'POST'])
 def get_from_mongodb():
-    pass
+    if (request.method == 'POST'):
+        
+        # Getting the variables from Postman
+        path = str(request.json['mongo_path'])          # Storing the mongodb server url
+        db_name = str(request.json['db'])               # Storing the name of the database 
+        collection = str(request.json['collection'])    # Storing the name of the collection
+        
+        # Setting up and connecting to Mongodb database
+        client = pymongo.MongoClient(path)
+        
+        # Assigning the database to variable 'db'
+        db = client[db_name]
 
+        # Assigning the collection to variable 'coll'
+        coll = db[collection]
+
+        # Fetching all the documents
+        result = str(list(coll.find()))
+
+        # Returning the documents to Postman
+        return jsonify(result)
+
+        
 # Initializing to run the queries automatically without calling the functions 
 if __name__ == '__main__':
     app.run()
